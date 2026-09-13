@@ -1,0 +1,6 @@
+{
+  "name": "Agent Workspace",
+  "description": "A sophisticated workspace for an agent to perform structured, narrative, and self work, featuring a chat terminal, vision synthesizer, alteration suite, and search grounding nexuses.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

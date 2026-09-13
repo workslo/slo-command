@@ -1,0 +1,51 @@
+{
+  "project_id": "plated-observer-499302-k6",
+  "collections": [
+    {
+      "name": "journals",
+      "fields": [
+        { "name": "userId", "type": "string", "rules": { "required": true } },
+        { "name": "title", "type": "string", "rules": { "required": true } },
+        { "name": "content", "type": "string", "rules": { "required": true } },
+        { "name": "createdAt", "type": "timestamp", "rules": { "required": true, "is_server_timestamp": true } },
+        { "name": "updatedAt", "type": "timestamp", "rules": { "required": true, "is_server_timestamp": true } }
+      ],
+      "access_rules": {
+        "read": "request.auth != null && resource.data.userId == request.auth.uid",
+        "create": "request.auth != null && request.resource.data.userId == request.auth.uid",
+        "update": "request.auth != null && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid",
+        "delete": "request.auth != null && resource.data.userId == request.auth.uid"
+      }
+    },
+    {
+      "name": "sessions",
+      "fields": [
+        { "name": "userId", "type": "string", "rules": { "required": true } },
+        { "name": "summary", "type": "string", "rules": { "required": true } },
+        { "name": "date", "type": "timestamp", "rules": { "required": true } },
+        { "name": "notes", "type": "string", "rules": { "required": false } }
+      ],
+      "access_rules": {
+        "read": "request.auth != null && resource.data.userId == request.auth.uid",
+        "create": "request.auth != null && request.resource.data.userId == request.auth.uid",
+        "update": "request.auth != null && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid",
+        "delete": "request.auth != null && resource.data.userId == request.auth.uid"
+      }
+    },
+    {
+      "name": "prompts",
+      "fields": [
+        { "name": "userId", "type": "string", "rules": { "required": true } },
+        { "name": "content", "type": "string", "rules": { "required": true } },
+        { "name": "theme", "type": "string", "rules": { "required": true } },
+        { "name": "createdAt", "type": "timestamp", "rules": { "required": true, "is_server_timestamp": true } }
+      ],
+      "access_rules": {
+        "read": "request.auth != null && resource.data.userId == request.auth.uid",
+        "create": "request.auth != null && request.resource.data.userId == request.auth.uid",
+        "update": "request.auth != null && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid",
+        "delete": "request.auth != null && resource.data.userId == request.auth.uid"
+      }
+    }
+  ]
+}
