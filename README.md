@@ -22,7 +22,7 @@ Leave AI Studio and you keep a small hybrid app. The app assumes Studio injects 
 
 ## How it works
 
-`tsx server.ts` starts Express on `0.0.0.0:3000`. In non-production the process mounts Vite SPA middleware. In production it serves `dist`. The browser loads `src/main.tsx`, then `App`, then `Sidebar` plus one workspace.
+`tsx server.ts` starts Express on `0.0.0.0:3000`. If `NODE_ENV` is not `production`, the process mounts Vite SPA middleware. If it is `production`, the process serves `dist`. `npm start` is `node dist/server.cjs` and does not set `NODE_ENV`. The browser loads `src/main.tsx`, then `App`, then `Sidebar` plus one workspace.
 
 ```mermaid
 flowchart LR
@@ -119,6 +119,8 @@ High, after you leave Studio:
 6. The JSON body limit is `50mb`. Multer memory storage has no file-size cap. An open `/api/image/edit` can pin RAM.
 7. Preview model ids, Search and Maps tools, and `aistudio-build` may return 400 or 403 on a normal Gemini developer key. This checkout did not call Gemini.
 8. There is no `firebase.json`, `.firebaserc`, or `storage.rules`. You cannot `firebase deploy` this tree as written.
+9. `npm start` does not set `NODE_ENV=production`. Anything other than `production` calls `createViteServer`. That path needs `vite.config.ts`, `src/`, and `vite` in `node_modules`. Studio's container may have set the variable. This repo does not.
+10. `esbuild` writes `dist/server.cjs` into the same directory that `express.static` serves. A `GET /server.cjs` can download the server bundle. The Gemini key is not in that file. The route logic is.
 
 Medium:
 
@@ -129,6 +131,7 @@ Medium:
 - Fetches use relative `/api/...` paths. There is no `cors` package. Split Hosting and API will fail in the browser. `vite` alone returns 404 on every AI route.
 - `test-img-gen.ts` and `test-instruction.ts` hit live Gemini if the key is set. They are not in npm scripts. `tsc --noEmit` still typechecks them.
 - Atlas filters `chunk.web` after a `googleMaps` tool. Location cards can be empty while the text works.
+- Chat appends API failures as `role: 'model'` messages. The next turn sends those error strings back as history.
 
 Low:
 
@@ -165,6 +168,10 @@ The next engineer inherits two backends glued by a Studio template. Express owns
 
 The `@/` alias in `tsconfig.json` and `vite.config.ts` has zero imports.
 
+`vite` is listed in both `dependencies` and `devDependencies`. The `server.ts` import makes the `dependencies` entry load-bearing. Drop the `devDependencies` copy, not the other one.
+
+Archive `handleSave` writes `summary` and `notes` and does not bump `date`. The list order does not change on edit. Journal does bump `updatedAt`.
+
 This checkout was not run, `node_modules` was not installed, and live Firebase or Gemini was not called. These stay unknown:
 
 - Whether Studio's hosted runtime remapped Firestore to the named database
@@ -172,4 +179,4 @@ This checkout was not run, `node_modules` was not installed, and live Firebase o
 - Whether `gemini-3.6-flash`, `gemini-3.7-flash`, and `gemini-3.1-flash-image` exist on a key you create outside Studio
 - Whether `googleMaps` grounding needs a separate Maps key
 
-A useful first cut is to require a Firebase ID token on `/api/*`, load `GEMINI_API_KEY` on purpose, honor `PORT`, and point `getFirestore` at the database that actually has your data.
+A useful first cut is to require a Firebase ID token on `/api/*`, load `GEMINI_API_KEY` on purpose, honor `PORT`, set `NODE_ENV=production` on `start`, keep `server.cjs` out of the static root, and point `getFirestore` at the database that actually has your data.
